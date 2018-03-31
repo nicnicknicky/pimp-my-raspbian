@@ -1,0 +1,12 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+println "$(date) [TRACE] Modifying NTP settings" "green"
+sed -i 's|^[#]\?NTP.*|NTP=0.sg.pool.ntp.org|g' /etc/systemd/timesyncd.conf
+sed -i 's|^[#]\?FallbackNTP.*|FallbackNTP=1.sg.pool.ntp.org 2.sg.pool.ntp.org 3.sg.pool.ntp.org|g' /etc/systemd/timesyncd.conf
+
+println "$(date) [TRACE] Restarting NTP service to get synced time" "green"
+systemctl restart systemd-timesyncd
+systemctl -q is-active systemd-timesyncd

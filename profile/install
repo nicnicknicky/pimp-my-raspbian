@@ -1,0 +1,8 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+println "$(date) [INFO] Installing .bashrc configuration" "green"
+mv .bashrc_core /home/$GENERIC_ADMIN_USER/.bashrc
+chsh -s /bin/bash $GENERIC_ADMIN_USER

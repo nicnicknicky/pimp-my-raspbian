@@ -1,0 +1,46 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+println "$(date) [TRACE] Amend $RPI_DEV_GROUP group for passwordless sudo" "green"
+replace_string_sudoers() {
+  sed -i 's/'"$1"'/'"$2"'/g' /etc/sudoers
+}
+
+ORIGINAL_COMMENT_STRING="$RPI_DEV_GROUP to execute any command"
+REPLACEMENT_COMMENT_STRING="$RPI_DEV_GROUP to execute commands passwordless"
+replace_string_sudoers "$ORIGINAL_COMMENT_STRING" "$REPLACEMENT_COMMENT_STRING"
+
+ORIGINAL_PERMISSION_STRING="%$RPI_DEV_GROUP ALL=(ALL:ALL) ALL"
+REPLACEMENT_PERMISSION_STRING="%$RPI_DEV_GROUP ALL=(ALL) PASSWD:ALL"
+replace_string_sudoers "$ORIGINAL_PERMISSION_STRING" "$REPLACEMENT_PERMISSION_STRING"
+
+# check for empty passwords
+println "$(date) [TRACE] Checking for users with empty passwords." "green"
+awk -F: '($2 == "") {print}' /etc/shadow
+awk -F: '($2 == "!") {print}' /etc/shadow
+
+# check only root user has UID 0
+println "$(date) [TRACE] Check for users other than root with UID 0." "green"
+awk -F: '($3 == "0") {print}' /etc/passwd
+
+# disable root login over ssh
+println "$(date) [INFO] Disable root login over ssh." "green"
+sed -i 's|^[#]\?PermitRootLogin.*|PermitRootLogin no|g' /etc/ssh/sshd_config
+
+# disable root user
+println "$(date) [INFO] Disable root user login." "green"
+passwd -l root
+
+# remove pi user and /home/pi
+println "$(date) [INFO] Delete default pi user" "green"
+userdel -r pi
+
+# remove pi sudoers backdoor
+println "$(date) [INFO] Delete pi user sudoers privilege" "green"
+rm /etc/sudoers.d/010_pi-nopasswd
+
+# enable ufw
+println "$(date) [INFO] Enable UFW." "green"
+ufw --force enable

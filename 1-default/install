@@ -1,0 +1,12 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+packages=(curl usb-modeswitch usb-modeswitch-data usbutils man-db less more)
+
+for i in "${packages[@]}"
+do
+  println "$(date) [TRACE] Installing ${i} packages" "green"
+  DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes $i 1> /dev/null
+done

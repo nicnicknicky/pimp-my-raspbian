@@ -1,0 +1,28 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+SERVICE_NAME=bootup-slack-alert
+
+# Update Script Variables
+sed -i "s|rpiusergroup|$RPI_DEV_GROUP|g" bootup-slack-alert.sh
+if [[ -z $SLACK_BOOTUP_URL ]]; then
+  sed -i "s|^[#]\?SLACK_URL.*|SLACK_URL=$SLACK_BOOTUP_URL|g" bootup-slack-alert.sh
+else
+  println "Slack bootup URL is empty. $SERVICE_NAME-service installation skipped." "red"
+  exit 1
+fi
+
+println "$(date) [TRACE] Installing $SERVICE_NAME.sh" "green"
+mv $SERVICE_NAME.sh /usr/local/bin/
+chmod u+x /usr/local/bin/$SERVICE_NAME.sh
+
+println "$(date) [TRACE] Installing $SERVICE_NAME.service" "green"
+mv $SERVICE_NAME.service /etc/systemd/system/
+
+println "$(date) [TRACE] Installing $SERVICE_NAME.timer" "green"
+mv $SERVICE_NAME.timer /etc/systemd/system/
+
+println "$(date) [TRACE] Enabling $SERVICE_NAME.timer" "green"
+systemctl enable $SERVICE_NAME.timer

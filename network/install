@@ -1,0 +1,14 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+# install interfaces
+mv interfaces /etc/network/interfaces
+
+# wpa_supplicant configuration
+if [[ ! -z $SSID ]] && [[ ! -z $WPA_PSK ]; then
+  sed -i "s|ssid.*|ssid=\"$SSID\"|g" wpa_supplicant.conf
+  sed -i "s|psk.*|psk=\"$WPA_PSK\"|g" wpa_supplicant.conf
+fi
+mv wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# add `. {FULL PATH OF FUNCTION}` underneath `#!/bin/bash` to import function to script
+
+quiet="no"
+
+# println helper function for colors and output suppressiong
+# Arg 1 - string to println
+# Arg 2 - color
+# Arg 3 - new line flag
+function print() {
+  if [[ "$quiet" != "yes" ]]; then
+    case "$2" in
+      red|RED|Red )
+        echo -en "\033[0;31m"
+        ;;
+      yellow|YELLOW|Yellow )
+        echo -en "\033[0;33m"
+        ;;
+      green|GREEN|Green )
+        echo -en "\033[0;32m"
+        ;;
+    esac
+    if [[ "$3" == "yes" ]]; then
+      echo -e "$1"
+    else
+      echo -en "$1"
+    fi
+    echo -en "\033[0;37m"
+  fi
+}
+
+function println() {
+  print "$1" "$2" "yes"
+}

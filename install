@@ -1,0 +1,48 @@
+#!/bin/bash
+
+. setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+PKG_PATH=$(pwd)
+
+# $1: variable to check "true" set in setup.conf
+# $2: name of install file to rename
+function switch_install {
+  if [[ $1 == "true" ]]; then
+    for dir in $PKG_PATH/*/; do
+      file=$(basename "$dir")
+      ls $dir | grep -E "^$2" 1> /dev/null
+      if [ $? = 0 ]; then
+        mv $dir/$2 $dir/install
+      fi
+    done
+  fi
+}
+
+# Process setup configuration
+switch_install $HARDEN_RPI "hardening_install"
+switch_install $SLACK_BOOTUP_ALERT "bootupslack_install"
+switch_install $SLACK_SSH_ALERT "sshslack_install"
+
+# Execute install for each directory
+for dir in $PKG_PATH/*/; do
+  file=$(basename "$dir")
+  cd $dir
+  ls $dir | grep -E '^install' 1> /dev/null
+  # check for install file and execute
+  if [ $? = 0 ]; then
+    println ""
+    println "----------------------------------" "green"
+    println "$(date) [INFO] Installing $file" "green"
+    println "----------------------------------" "green"
+    chmod u+x $dir/install
+    ./install
+    if [ $? != 0 ]; then
+      println "$(date) [ERROR] Installing $file failed" "red"
+    fi
+  else
+    println "$(date) [INFO] Skipping $file, install file not found." "green"
+  cd $PKG_PATH
+done
+
+println "$(date) [INFO] ⚡️ Package Installation Complete ⚡️" "green"

@@ -1,0 +1,8 @@
+[Unit]
+Description=Trigger slack alert 1 min after boot
+
+[Timer]
+OnBootSec=1min
+
+[Install]
+WantedBy=timers.target

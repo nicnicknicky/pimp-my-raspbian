@@ -1,0 +1,15 @@
+#!/bin/bash
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+println "$(date) [TRACE] Installing ufw packages" "green"
+DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes ufw 1> /dev/null
+mv before.rules /etc/
+mv ufw.conf /etc/
+
+println "$(date) [TRACE] Adding ufw rules" "green"
+# default rules
+./ufw-default-rules
+
+# port specific rules
+./ufw-add-rules

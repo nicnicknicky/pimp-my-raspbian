@@ -1,0 +1,6 @@
+[Unit]
+Description=Slack alert on system boot
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/bootup-slack-alert.sh

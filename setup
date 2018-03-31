@@ -1,0 +1,128 @@
+$INSTALL_DIR#!/bin/bash
+
+##### Create Modified Raspbian Image #####
+# ALERT: Variables defined in this script are to be set via setup.conf
+
+echo "###### Starting Raspbian Image Modification #####"
+echo ""
+
+# [PRE-INSTALL] Setup Configuration
+. setup.conf
+
+# [PRE-INSTALL] Helper functions for setup
+echo "$(date) [INFO] Copy color functions for better visibility during the installation"
+mkdir -p /usr/local/lib/$RPI_DEV_GROUP/functions
+cp $INSTALL_DIR/functions/color_text /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+chmod u+x /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+# [PRE-INSTALL] Check network connectivity
+println "$(date) [INFO] Connectivity check" "green"
+ping -w 5 8.8.8.8 &> /dev/null
+if [[ $? -ne 0 ]]; then
+  println "No network connectivity. Exiting..." "red"
+  exit 1
+fi
+
+# Hostname
+println "$(date) [INFO] Installing hostname" "green"
+FINAL_HOSTNAME=$RPI_DEV_GROUP$(cat /proc/cpuinfo | grep Serial | awk '{print $3}')
+println "$(date) [INFO] Changing hostname to "$FINAL_HOSTNAME "green"
+echo "$FINAL_HOSTNAME" > /etc/hostname
+
+# Users and Groups
+println "$(date) [INFO] Creating new group $RPI_DEV_GROUP" "green"
+groupadd $RPI_DEV_GROUP
+
+println "$(date) [INFO] Creating generic admin user $GENERIC_ADMIN_USER" "green"
+useradd $GENERIC_ADMIN_USER -s /bin/bash -m -G $RPI_DEV_GROUP
+
+println "$(date) [INFO] Taking in $GENERIC_ADMIN_USER user password" "green"
+read -e -p "Enter password for $GENERIC_ADMIN_USER user: " admin_user_password
+
+println "$(date) [INFO] Adding $GENERIC_ADMIN_USER user password" "green"
+echo $GENERIC_ADMIN_USER:$admin_user_password | /usr/sbin/chpasswd
+
+println "$(date) [INFO] Adding $RPI_DEV_GROUP in sudoers list" "green"
+echo "# Allow members of group $RPI_DEV_GROUP to execute any command" >> /etc/sudoers
+echo "%$RPI_DEV_GROUP ALL=(ALL:ALL) ALL" >> /etc/sudoers
+usermod -a -G $RPI_DEV_GROUP root
+
+# Log Folders
+println "$(date) [INFO] Creating new log folders" "green"
+mkdir -p /var/log/$RPI_DEV_GROUP
+chgrp -R $RPI_DEV_GROUP /var/log/$RPI_DEV_GROUP
+chmod -R g+w /var/log/$RPI_DEV_GROUP
+
+# Modify Apt Mirror
+println "$(date) [INFO] Updating apt mirror in /etc/apt/sources.list" "green"
+sed -i "s|deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi|deb http://mirror.mythic-beasts.com/raspbian/raspbian/ stretch main contrib non-free|g" /etc/apt/sources.list
+
+# Apt-Get Essentials
+println "$(date) [INFO] Updating and upgrading apt-get" "green"
+DEBIAN_FRONTEND=noninteractive apt-get --yes update 1>/dev/null
+DEBIAN_FRONTEND=noninteractive apt-get --yes upgrade 1>/dev/null
+DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes apt-transport-https 1> /dev/null
+
+# Set Version
+println "$(date) [INFO] Add version file" "green"
+version_detail=$IMAGE_VERSION"-"$IMAGE_NAME", $(date +%d-%b-%Y)"
+echo "$version_detail" > /etc/raspbian_mod_image_version
+
+# Install Packages
+println "$(date) [INFO] Installing packages" "green"
+chmod u+x $INSTALL_DIR/install
+$INSTALL_DIR/install $RPI_DEV_GROUP
+cd
+
+# Disabling Services
+println "$(date) [INFO] Disabling services" "green"
+disable_services=(bluetooth)
+for i in "${disable_services[@]}"
+do
+  println "$(date) [INFO] Disabling ${i} service" "green"
+  systemctl disable $i 1> /dev/null
+done
+
+# Remove Packages
+println "$(date) [INFO] Removing packages" "green"
+
+remove_packages=(libusb-1.0-0-dev wget libgcc-*-dev dosfstools smbclient samba-common alsa-base alsa-utils x11vnc)
+
+for i in "${remove_packages[@]}"
+do
+  println "$(date) [INFO] Removing ${i}" "green"
+  apt-get purge --yes $i 1> /dev/null
+done
+
+println "$(date) [INFO] Purging any leftover config files" "green"
+apt-get purge --auto-remove --yes 1> /dev/null
+apt-get autoremove --yes 1> /dev/null
+dpkg --list | grep "^rc" | cut -d " " -f 3 | xargs -r sudo dpkg --purge
+
+println "$(date) [INFO] Cleaning packages" "green"
+apt-get --yes clean
+
+# reduce networking.service timeout threshold to improve boot time
+println "$(date) [INFO] Change networking.service start timeout to 5 secs" "green"
+sed -i 's|^TimeoutStartSec.*|TimeoutStartSec=5sec|g' /etc/systemd/system/network-online.target.wants/networking.service
+sed -i 's|^TimeoutStartSec.*|TimeoutStartSec=5sec|g' /lib/systemd/system/networking.service
+
+# run hardening script
+if [[ $HARDEN_RPI = "true" ]]; then
+  println "$(date) [INFO] Running hardening script" "green"
+  chmod +x $INSTALL_DIR/endsetup_hardening
+  $INSTALL_DIR/endsetup_hardening
+fi
+println "$(date) [INFO] Removing installation directory" "green"
+rm -rf $INSTALL_DIR
+
+# Cleanup Logs
+logs=(alternatives.log auth.log apt/history.log apt/term.log bootstrap.log daemon.log debug dpkg.log kern.log messages syslog syslog.log wvdialconf.log)
+for i in "${logs[@]}"; do
+  println "$(date) [INFO] Remove $i logs" "green"
+  cat /dev/null > /var/log/$i
+done
+
+# clear command line history
+history -cw

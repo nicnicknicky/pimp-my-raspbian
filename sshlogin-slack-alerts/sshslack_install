@@ -1,0 +1,19 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+if [[ -z $SLACK_SSH_URL ]]; then
+  sed -i "s|^[#]\?SLACK_URL.*|SLACK_URL=$SLACK_SSH_URL|g" slack-alert.sh
+else
+  println "Slack ssh URL is empty. $SERVICE_NAME-service installation skipped." "red"
+  exit 1
+fi
+
+println "$(date) [INFO] Installing slack-alert script" "green"
+mv slack-alert.sh /usr/local/lib/rpiusergroup/
+chmod u+x /usr/local/lib/rpiusergroup/slack-alert.sh
+
+println "$(date) [INFO] Adding ssh login slack alert to PAM configuration" "green"
+echo "# on login and logout, execute slack-alert.sh" >> /etc/pam.d/sshd
+echo "session   required   pam_exec.so /usr/local/lib/rpiusergroup/slack-alert.sh" >> /etc/pam.d/sshd

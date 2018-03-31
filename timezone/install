@@ -1,0 +1,8 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+mv timezone /etc/
+rm -f /etc/localtime
+ln -s /usr/share/zoneinfo/Asia/Singapore /etc/localtime

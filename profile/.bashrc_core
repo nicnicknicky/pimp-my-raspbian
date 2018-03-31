@@ -1,0 +1,22 @@
+export LS_OPTIONS='--color=auto'
+export LC_ALL=C
+
+eval "`dircolors`"
+alias ls='ls $LS_OPTIONS'
+alias ll='ls $LS_OPTIONS -al'
+
+export NVM_DIR="/root/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# set a 5 min timeout policy
+TMOUT=300
+readonly TMOUT
+export TMOUT
+
+# don't put duplicate lines or lines starting with space in the history
+HISTCONTROL=ignoreboth
+
+PS1='\[\e[35m\][\u@\h \w] \D{%a %d %b %Y %l:%M:%S %p}\[\e[m\]\n\$ '
+
+# add to $PATH
+export PATH="$PATH:/sbin"

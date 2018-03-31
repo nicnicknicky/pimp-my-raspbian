@@ -1,0 +1,8 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+println "$(date) [TRACE] Installing fail2ban packages" "green"
+DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes fail2ban 1> /dev/null
+mv jail.local /etc/fail2ban/

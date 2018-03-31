@@ -1,0 +1,11 @@
+ufw limit 22/tcp
+ufw limit out 22/tcp
+ufw allow out 443/tcp
+ufw allow out 80/tcp
+ufw allow 123/udp
+ufw allow out 123/udp
+ufw allow from any port 68 to any port 67 proto udp
+ufw allow from any port 67 to any port 68 proto udp
+ufw allow out 53/udp
+ufw allow out 67/udp
+ufw allow out 68/udp

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+SERVICE_NAME=startup
+
+# Update Script Variables
+sed -i "s|rpiusergroup|$RPI_DEV_GROUP|g" startup.sh
+
+println "$(date) [TRACE] Installing $SERVICE_NAME.sh" "green"
+mv $SERVICE_NAME.sh /usr/local/bin/
+chmod u+x /usr/local/bin/$SERVICE_NAME.sh
+
+println "$(date) [TRACE] Installing $SERVICE_NAME.service" "green"
+mv $SERVICE_NAME.service /etc/systemd/system/
+
+println "$(date) [TRACE] Enabling $SERVICE_NAME.service" "green"
+systemctl enable $SERVICE_NAME.service

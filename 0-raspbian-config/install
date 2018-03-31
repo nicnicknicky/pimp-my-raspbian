@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+# Set locale to en_US.UTF-8
+LOCALE="en_US.UTF-8"
+ENCODING="UTF-8"
+println "$(date) [INFO] Setting locale:$LOCALE and encoding:$ENCODING" "green"
+echo "$LOCALE $ENCODING" > /etc/locale.gen
+sed -i "s/^\s*LANG=\S*/LANG=$LOCALE/" /etc/default/locale
+dpkg-reconfigure -f noninteractive locales
+
+# Set the keyboard to US, don't set any modifier keys
+KEYMAP="us"
+println "$(date) [INFO] Setting keyboard layout: $KEYMAP" "green"
+sed -i /etc/default/keyboard -e "s/^XKBLAYOUT.*/XKBLAYOUT=\"$KEYMAP\"/"
+dpkg-reconfigure -f noninteractive keyboard-configuration
+
+# Enable serial console
+println "$(date) [INFO] Enabling serial console" "green"
+echo "enable_uart=1" >> /boot/config.txt

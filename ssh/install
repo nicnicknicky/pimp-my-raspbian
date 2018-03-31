@@ -1,0 +1,63 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+# update sshd_config.conf for $GENERIC_ADMIN_USER
+echo "AllowUsers $GENERIC_ADMIN_USER" >> sshd_config.conf
+
+# pubkey authentication
+if [[ SSH_PUBKEYAUTH == "true" ]]; then
+  # pubkey installation
+  println "$(date) [INFO] Installing public keys for core user" "green"
+  mkdir -p /home/$GENERIC_ADMIN_USER/.ssh
+  chown $GENERIC_ADMIN_USER:$RPI_DEV_GROUP /home/$GENERIC_ADMIN_USER/.ssh/
+  chmod 700 /home/$GENERIC_ADMIN_USER/.ssh/
+  touch /home/$GENERIC_ADMIN_USER/.ssh/authorized_keys
+  chown $GENERIC_ADMIN_USER:$RPI_DEV_GROUP /home/$GENERIC_ADMIN_USER/.ssh/authorized_keys
+  chmod 600 /home/$GENERIC_ADMIN_USER/.ssh/authorized_keys
+  PUB_KEYS=$(ls $INSTALL_DIR/ssh/pub_keys/)
+  for USERKEY in $PUB_KEYS; do
+    println "$(date) [INFO] Adding $USERKEY to authorized_keys" "green"
+    cat $INSTALL_DIR/ssh/pub_keys/$USERKEY >> /home/$GENERIC_ADMIN_USER/.ssh/authorized_keys
+  done
+  # update sshd_config for pubkey authentication
+  sed -i 's|PubkeyAuthentication.*|PubkeyAuthentication yes|g' sshd_config.conf
+  sed -i 's|PasswordAuthentication.*|PasswordAuthentication no|g' sshd_config.conf
+  sed -i 's|ChallengeResponseAuthentication.*|ChallengeResponseAuthentication no|g' sshd_config.conf
+fi
+
+# sshd_config
+println "$(date) [TRACE] Installing sshd_config" "green"
+src_sshdconfig="$(pwd)/sshd_config.conf"
+dst_sshdconfig="/etc/ssh/sshd_config"
+# comment out key value pairs in destination config file if match found
+# preserves the default values of keys for those unchanged
+if [[ -f $src_sshdconfig ]]; then
+  while IFS= read -r line
+  do
+    config_key=$(echo $line | awk '{print $1}')
+    sed -E "/^[[:space:]]*$config_key\b/ s/^/#/" -i $dst_sshdconfig
+  done <"$src_sshdconfig"
+fi
+# append contents of .conf to destination config file
+cat $src_sshdconfig >> $dst_sshdconfig
+
+# ssh_config
+println "$(date) [TRACE] Installing ssh_config for $GENERIC_ADMIN_USER" "green"
+src_sshconfig="$(pwd)/ssh_config.conf"
+dst_sshconfig="/home/$GENERIC_ADMIN_USER/.ssh/config"
+# comment out key value pairs in destination config file if match found
+# preserves the default values of keys for those unchanged
+if [[ -f $src_sshconfig ]]; then
+  while IFS= read -r line
+  do
+    config_key=$(echo $line | awk '{print $1}')
+    sed -E "/^[[:space:]]*$config_key\b/ s/^/#/" -i $dst_sshconfig
+  done <"$src_sshconfig"
+fi
+# append contents of .conf to destination config file
+cat $src_sshconfig >> $dst_sshconfig
+
+println "$(date) [INFO] Enabling ssh" "green"
+systemctl enable ssh
