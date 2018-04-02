@@ -6,11 +6,20 @@ BOOT_MOD_CONF_PATH="/boot/raspberry_boot_mod.conf"
 
 # source raspberry_boot_mod.conf file if it exists
 # easy method to customise env variables without booting image
-
 function source_boot_mod_config {
   if [[ -e $BOOT_MOD_CONF_PATH ]]; then
     echo "$(date) rpiusergroup-startup.service: source $BOOT_MOD_CONF_PATH to update env variables."
     source $BOOT_MOD_CONF_PATH
+    update_wpa_supplicant
+  fi
+}
+
+# update wpa_supplicant ssid,psk if found in raspberry_boot_mod.conf
+function update_wpa_supplicant {
+  if [[ ! -z $WLAN_SSID ]] && [[ ! -z $WLAN_WPA_PSK ]; then
+    sed -i "s|ssid.*|ssid=\"$WLAN_SSID\"|g" /etc/wpa_supplicant/wpa_supplicant.conf
+    sed -i "s|psk.*|psk=\"$WLAN_WPA_PSK\"|g" /etc/wpa_supplicant/wpa_supplicant.conf
+    service networking restart
   fi
 }
 
