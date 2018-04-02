@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+# install packages
+kiosk_packages=(chromium-browser x11-xserver-utils unclutter)
+for i in "${kiosk_packages[@]}"
+do
+  println "$(date) [TRACE] Installing ${i} packages" "green"
+  DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes $i
+done
+
+# configure chromium kiosk to launch on startup
+println "$(date) [TRACE] Editing startup.sh "green"
+cat <<EOF >> $(dirname $0)/../startup-service/startup.sh
+
+# launch chromium kiosk on startup"
+\$KIOSK_URL="$KIOSK_URL"
+\$CHROMIUM_FLAGS="$CHROMIUM_FLAGS"
+/usr/bin/chromium-browser \$CHROMIUM_FLAGS \$KIOSK_URL
+EOF

@@ -23,6 +23,7 @@ function switch_install {
 switch_install $HARDEN_RPI "hardening_install"
 switch_install $SLACK_BOOTUP_ALERT "bootupslack_install"
 switch_install $SLACK_SSH_ALERT "sshslack_install"
+switch_install $CHROMIUM_KIOSK "kiosk_install"
 
 # Execute install for each directory
 for dir in $PKG_PATH/*/; do

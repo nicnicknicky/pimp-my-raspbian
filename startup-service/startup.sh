@@ -2,6 +2,19 @@
 set -e # exit on any error
 
 LOG_PATH="/var/log/rpiusergroup/rpiusergroup-services.log"
+BOOT_MOD_CONF_PATH="/boot/raspberry_boot_mod.conf"
+
+# source raspberry_boot_mod.conf file if it exists
+# easy method to customise env variables without booting image
+
+function source_boot_mod_config {
+  if [[ -e $BOOT_MOD_CONF_PATH ]]; then
+    echo "$(date) rpiusergroup-startup.service: source $BOOT_MOD_CONF_PATH to update env variables."
+    source $BOOT_MOD_CONF_PATH
+  fi
+}
+
+source_boot_mod_config
 
 # log boot up
 echo "
