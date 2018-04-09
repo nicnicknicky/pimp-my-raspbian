@@ -3,5 +3,5 @@
 . ../setup.conf
 . /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
 
-println "$(date) [TRACE] Installing CRON: $CRON_NAME"green"
-(crontab -l -u $CRON_USER; echo "$CRON_JOB_DESC") | crontab -u $CRON_USER -  
+println "$(date) [TRACE] Installing CRON: $CRON_NAME" "green"
+(crontab -l -u $CRON_USER; echo "$CRON_JOB_DESC") | crontab -u $CRON_USER -

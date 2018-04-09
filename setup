@@ -55,8 +55,8 @@ chgrp -R $RPI_DEV_GROUP /var/log/$RPI_DEV_GROUP
 chmod -R g+w /var/log/$RPI_DEV_GROUP
 
 # Modify Apt Mirror
-println "$(date) [INFO] Updating apt mirror in /etc/apt/sources.list" "green"
-sed -i "s|deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi|deb http://mirror.mythic-beasts.com/raspbian/raspbian/ stretch main contrib non-free|g" /etc/apt/sources.list
+#println "$(date) [INFO] Updating apt mirror in /etc/apt/sources.list" "green"
+#sed -i "s|deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi|deb http://mirror.mythic-beasts.com/raspbian/raspbian/ stretch main contrib non-free|g" /etc/apt/sources.list
 
 # Apt-Get Essentials
 println "$(date) [INFO] Updating and upgrading apt-get" "green"

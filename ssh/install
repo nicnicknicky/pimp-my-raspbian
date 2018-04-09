@@ -33,7 +33,7 @@ src_sshdconfig="$(pwd)/sshd_config.conf"
 dst_sshdconfig="/etc/ssh/sshd_config"
 # comment out key value pairs in destination config file if match found
 # preserves the default values of keys for those unchanged
-if [[ -f $src_sshdconfig ]]; then
+if [[ -e $src_sshdconfig ]]; then
   while IFS= read -r line
   do
     config_key=$(echo $line | awk '{print $1}')
@@ -49,7 +49,7 @@ src_sshconfig="$(pwd)/ssh_config.conf"
 dst_sshconfig="/home/$GENERIC_ADMIN_USER/.ssh/config"
 # comment out key value pairs in destination config file if match found
 # preserves the default values of keys for those unchanged
-if [[ -f $src_sshconfig ]]; then
+if [[ -e $src_sshconfig ]]; then
   while IFS= read -r line
   do
     config_key=$(echo $line | awk '{print $1}')

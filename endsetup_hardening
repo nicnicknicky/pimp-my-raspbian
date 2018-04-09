@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ../setup.conf
+. setup.conf
 . /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
 
 println "$(date) [TRACE] Amend $RPI_DEV_GROUP group for passwordless sudo" "green"
@@ -34,7 +34,7 @@ println "$(date) [INFO] Disable root user login." "green"
 passwd -l root
 
 # remove pi user and /home/pi
-println "$(date) [INFO] Delete default pi user" "green"
+println "$(date) [INFO] Delete default pi user: succeeds only if pi user is not logged in." "green"
 userdel -r pi
 
 # remove pi sudoers backdoor
