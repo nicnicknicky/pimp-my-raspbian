@@ -7,7 +7,7 @@
 mv interfaces /etc/network/interfaces
 
 # wpa_supplicant configuration
-if [[ ! -z $SSID ]] && [[ ! -z $WPA_PSK ]; then
+if [[ ! -z $SSID ]] && [[ ! -z $WPA_PSK ]]; then
   sed -i "s|ssid.*|ssid=\"$SSID\"|g" wpa_supplicant.conf
   sed -i "s|psk.*|psk=\"$WPA_PSK\"|g" wpa_supplicant.conf
 fi

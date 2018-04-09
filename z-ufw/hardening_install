@@ -9,7 +9,9 @@ mv ufw.conf /etc/
 
 println "$(date) [TRACE] Adding ufw rules" "green"
 # default rules
+chmod +x ufw-default-rules
 ./ufw-default-rules
 
 # port specific rules
+chmod +x ufw-add-rules
 ./ufw-add-rules

@@ -3,7 +3,7 @@
 . ../setup.conf
 . /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
 
-packages=(curl usb-modeswitch usb-modeswitch-data usbutils man-db less more)
+packages=(curl usb-modeswitch usb-modeswitch-data usbutils man-db less)
 
 for i in "${packages[@]}"
 do
