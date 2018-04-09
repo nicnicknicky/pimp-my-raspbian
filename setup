@@ -1,4 +1,4 @@
-$INSTALL_DIR#!/bin/bash
+#!/bin/bash
 
 ##### Create Modified Raspbian Image #####
 # ALERT: Variables defined in this script are to be set via setup.conf

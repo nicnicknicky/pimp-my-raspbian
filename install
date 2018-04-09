@@ -43,6 +43,7 @@ for dir in $PKG_PATH/*/; do
     fi
   else
     println "$(date) [INFO] Skipping $file, install file not found." "green"
+  fi
   cd $PKG_PATH
 done
 
