@@ -12,11 +12,7 @@ do
 done
 
 # configure chromium kiosk to launch on startup
-println "$(date) [TRACE] Editing startup.sh "green"
-cat <<EOF >> $(dirname $0)/../startup-service/startup.sh
-
-# launch chromium kiosk on startup"
-CHROMIUM_URL="$KIOSK_URL"
-CHROMIUM_FLAGS="$KIOSK_FLAGS"
-/usr/bin/chromium-browser \$CHROMIUM_FLAGS \$CHROMIUM_URL
-EOF
+println "$(date) [TRACE] Editing startup.sh for chromium kiosk" "green"
+sed -i "s|^CHROMIUM_URL=|CHROMIUM_URL=\"$KIOSK_URL\"|g" kiosk_startup_calls
+sed -i "s|^CHROMIUM_FLAGS=|CHROMIUM_FLAGS=\"$KIOSK_FLAGS\"|g" kiosk_startup_calls
+cat kiosk_startup_calls >> $(dirname $0)/../startup-service/startup.sh
