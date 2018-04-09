@@ -16,7 +16,7 @@ println "$(date) [TRACE] Editing startup.sh "green"
 cat <<EOF >> $(dirname $0)/../startup-service/startup.sh
 
 # launch chromium kiosk on startup"
-KIOSK_URL="$KIOSK_URL"
-CHROMIUM_FLAGS="$CHROMIUM_FLAGS"
-/usr/bin/chromium-browser \$CHROMIUM_FLAGS \$KIOSK_URL
+CHROMIUM_URL="$KIOSK_URL"
+CHROMIUM_FLAGS="$KIOSK_FLAGS"
+/usr/bin/chromium-browser \$CHROMIUM_FLAGS \$CHROMIUM_URL
 EOF
