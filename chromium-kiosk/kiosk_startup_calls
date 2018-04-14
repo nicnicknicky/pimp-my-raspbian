@@ -1,5 +1,10 @@
+# configure x-session for kiosk mode
+xset s off          # don't activate screensaver
+xset -dpms          # disable DPMS (Energy Star) features.
+xset s noblank      # don't blank the video device
+unclutter -idle 0.1 # "hide" mouse cursor
 
 # launch chromium kiosk on startup
 CHROMIUM_URL=""
 CHROMIUM_FLAGS=""
-/usr/bin/chromium-browser $CHROMIUM_FLAGS $CHROMIUM_URL
+su - ADMINUSER -c "/usr/bin/chromium-browser $CHROMIUM_FLAGS $CHROMIUM_URL"
