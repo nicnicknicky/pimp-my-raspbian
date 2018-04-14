@@ -7,9 +7,23 @@
 LOCALE="en_US.UTF-8"
 ENCODING="UTF-8"
 println "$(date) [INFO] Setting locale:$LOCALE and encoding:$ENCODING" "green"
-echo "$LOCALE $ENCODING" > /etc/locale.gen
-sed -i "s/^\s*LANG=\S*/LANG=$LOCALE/" /etc/default/locale
+# /etc/default/locale
+cat >> /etc/default/locale << EOF
+LANG=$LOCALE
+LANGUAGE=$LOCALE
+LC_ALL=C
+LC_CTYPE=C
+EOF
+# debconf locale select
+cat << EOF | debconf-set-selections
+locales locales/locales_to_be_generated multiselect $LOCALE $ENCODING
+EOF
+rm /etc/locale.gen
 dpkg-reconfigure -f noninteractive locales
+update-locale LANG="$LOCALE"
+cat << EOF | debconf-set-selections
+locales locales/default_environment_locale select $LOCALE
+EOF
 
 # Set the keyboard to US, don't set any modifier keys
 KEYMAP="us"
