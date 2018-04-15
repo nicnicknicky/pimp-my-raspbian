@@ -11,12 +11,13 @@ do
   DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes $i
 done
 
-# disabling sleep in lightdm config
+# disabling sleep and change autologin user in lightdm config
 sed -i "/^\[Seat:\*\]$/ a xserver-command=X -s 0 dpms" /etc/lightdm/lightdm.conf
+sed -i "s|^autologin-user=.*|autologin-user=$GENERIC_ADMIN_USER|g" /etc/lightdm/lightdm.conf
 
 # configure chromium kiosk to launch on startup
 println "$(date) [TRACE] Editing startup.sh for chromium kiosk" "green"
-sed -i "s|^CHROMIUM_URL=|CHROMIUM_URL=\"$KIOSK_URL\"|g" kiosk_startup_calls
-sed -i "s|^CHROMIUM_FLAGS=|CHROMIUM_FLAGS=\"$KIOSK_FLAGS\"|g" kiosk_startup_calls
+sed -i "s|^CHROMIUM_URL=.*|CHROMIUM_URL=\"$KIOSK_URL\"|g" kiosk_startup_calls
+sed -i "s|^CHROMIUM_FLAGS=.*|CHROMIUM_FLAGS=\"$KIOSK_FLAGS\"|g" kiosk_startup_calls
 sed -i "s|\bADMINUSER\b|$GENERIC_ADMIN_USER|g" kiosk_startup_calls
 cat kiosk_startup_calls >> $(dirname $0)/../startup-service/startup.sh
