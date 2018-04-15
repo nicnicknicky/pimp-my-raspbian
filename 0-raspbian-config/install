@@ -14,6 +14,7 @@ LANGUAGE=$LOCALE
 LC_ALL=C
 LC_CTYPE=C
 EOF
+source /etc/default/locale
 # debconf locale select
 cat << EOF | debconf-set-selections
 locales locales/locales_to_be_generated multiselect $LOCALE $ENCODING
