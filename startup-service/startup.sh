@@ -10,7 +10,6 @@ function source_boot_mod_config {
   if [[ -e $BOOT_MOD_CONF_PATH ]]; then
     echo "$(date) rpiusergroup-startup.service: source $BOOT_MOD_CONF_PATH to update env variables."
     source $BOOT_MOD_CONF_PATH
-    update_wpa_supplicant
   fi
 }
 
@@ -24,6 +23,7 @@ function update_wpa_supplicant {
 }
 
 source_boot_mod_config
+update_wpa_supplicant
 
 # log boot up
 echo "

@@ -58,6 +58,23 @@ chmod -R g+w /var/log/$RPI_DEV_GROUP
 #println "$(date) [INFO] Updating apt mirror in /etc/apt/sources.list" "green"
 #sed -i "s|deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi|deb http://mirror.mythic-beasts.com/raspbian/raspbian/ stretch main contrib non-free|g" /etc/apt/sources.list
 
+# Apt-Get Cleanup
+println "$(date) [INFO] Removing unecessary packages" "green"
+pre_rm_packages="scratch squeak-plugins-scratch squeak-vm wolfram-engine python-minecraftpi
+minecraft-pi sonic-pi oracle-java8-jdk bluej greenfoot libreoffice* freepats python3-pygame
+python-pygame python-tk python3-rpi.gpio python-serial python3-serial python-picamera
+python3-picamera python3-pygame python-pygame python-tk python3-tk dillo x2x nuscratch
+timidity smartsim penguinspuzzle pistore python3-numpy python3-pifacecommon python3-pifacedigitalio
+python3-pifacedigital-scratch-handler python-pifacecommon python-pifacedigitalio"
+for i in $pre_rm_packages
+do
+  println "$(date) [INFO] Removing $i" "green"
+  apt-get purge --yes $i 1> /dev/null
+done
+apt-get purge --auto-remove --yes 1> /dev/null
+apt-get autoremove --yes 1> /dev/null
+apt-get --yes clean
+
 # Apt-Get Essentials
 println "$(date) [INFO] Updating and upgrading apt-get" "green"
 DEBIAN_FRONTEND=noninteractive apt-get --yes update 1>/dev/null

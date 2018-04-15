@@ -7,4 +7,5 @@ unclutter -idle 0.1 # "hide" mouse cursor
 # launch chromium kiosk on startup
 CHROMIUM_URL=""
 CHROMIUM_FLAGS=""
+source_boot_mod_config  # source configuration from raspberry_boot_mod.conf
 su - ADMINUSER -c "/usr/bin/chromium-browser $CHROMIUM_FLAGS $CHROMIUM_URL"
