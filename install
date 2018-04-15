@@ -37,6 +37,7 @@ for dir in $PKG_PATH/*/; do
     println "----------------------------------" "green"
     println "$(date) [INFO] Installing $file" "green"
     println "----------------------------------" "green"
+    cat /etc/apt/sources.list
     chmod u+x $dir/install
     ./install
     if [ $? != 0 ]; then

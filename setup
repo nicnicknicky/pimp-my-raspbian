@@ -61,7 +61,7 @@ sed -i "s|deb http:\/\/raspbian.*|$raspi_mirror|g" /etc/apt/sources.list
 
 # Apt-Get Cleanup
 println "$(date) [INFO] Removing unecessary packages:" "green"
-pre_rm_packages="oracle-java8-jdk scratch squeak-plugins-scratch squeak-vm wolfram-engine python-minecraftpi
+pre_rm_packages="scratch squeak-plugins-scratch squeak-vm wolfram-engine python-minecraftpi
 minecraft-pi sonic-pi bluej greenfoot libreoffice* freepats python3-pygame
 python-pygame python-tk python3-rpi.gpio python-serial python3-serial python-picamera
 python3-picamera python3-pygame python-pygame python-tk python3-tk dillo x2x nuscratch
@@ -85,6 +85,16 @@ DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes apt
 println "$(date) [INFO] Add version file" "green"
 version_detail=$IMAGE_VERSION"-"$IMAGE_NAME", $(date +%d-%b-%Y)"
 echo "$version_detail" > /etc/raspbian_mod_image_version
+
+# Install Raspbian Default Configuration
+zero_raspbian_config_path="$INSTALL_DIR/0-raspbian-config/install"
+if [[ -e $zero_raspbian_config_path ]]; then
+  println "$(date) [INFO] 0-raspbian-config: Installing locales, keyboard and defaults" "green"
+  chmod $zero_raspbian_config_path
+  $INSTALL_DIR/0-raspbian-config/install
+  source /etc/default/locale
+  rm -rf $zero_raspbian_config_path
+fi
 
 # Install Packages
 println "$(date) [INFO] Installing packages" "green"
