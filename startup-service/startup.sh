@@ -51,5 +51,4 @@ sed -i "/127.0.0.1/c 127.0.0.1 localhost ${DESIRED_HOSTNAME}" /etc/hosts
 # change group of apps folder
 chgrp rpiusergroup /usr/local/lib/rpiusergroup
 chmod g+x /usr/local/lib/rpiusergroup/*
-chmod g-x /usr/local/lib/rpiusergroup/*.txt
 chmod o-rwx /usr/local/lib/rpiusergroup/*

@@ -91,9 +91,11 @@ zero_raspbian_config_path="$INSTALL_DIR/0-raspbian-config/install"
 if [[ -e $zero_raspbian_config_path ]]; then
   println "$(date) [INFO] 0-raspbian-config: Installing locales, keyboard and defaults" "green"
   chmod +x $zero_raspbian_config_path
+  cd $INSTALL_DIR/0-raspbian-config
   $INSTALL_DIR/0-raspbian-config/install
   source /etc/default/locale
   rm -rf $zero_raspbian_config_path
+  cd $INSTALL_DIR
 fi
 
 # Install Packages
