@@ -20,8 +20,8 @@ cat << EOF | debconf-set-selections
 locales locales/locales_to_be_generated multiselect $LOCALE $ENCODING
 EOF
 rm /etc/locale.gen
-dpkg-reconfigure -f noninteractive locales
-update-locale LANG="$LOCALE"
+dpkg-reconfigure -f noninteractive locales &> /dev/null
+update-locale LANG="$LOCALE" &> /dev/null
 cat << EOF | debconf-set-selections
 locales locales/default_environment_locale select $LOCALE
 EOF

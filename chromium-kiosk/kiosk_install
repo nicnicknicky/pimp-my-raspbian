@@ -27,13 +27,13 @@ fi
 if [[ -e $USER_AUTOSTART_PATH ]]; then
   sed -i '/@xscreen.*/s/^/#/g' $USER_AUTOSTART_PATH
   println "$(date) [TRACE] Adding commands to autostart" "green"
-  cat <<EOF >> $USER_AUTOSTART_PATH
-  @xset s off
-  @xset -dpms
-  @xset s noblank
-  @unclutter -idle 0.1
-  @/home/$GENERIC_ADMIN_USER/kiosk_startup.sh
-  EOF
+cat <<EOF >> $USER_AUTOSTART_PATH
+@xset s off
+@xset -dpms
+@xset s noblank
+@unclutter -idle 0.1
+@/home/$GENERIC_ADMIN_USER/kiosk_startup.sh
+EOF
 fi
 
 # configure chromium kiosk URL and flags
