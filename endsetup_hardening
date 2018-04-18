@@ -35,6 +35,7 @@ passwd -l root
 
 # remove pi user and /home/pi
 println "$(date) [INFO] Delete default pi user: succeeds only if pi user is not logged in." "green"
+pkill -KILL -u pi
 userdel -r pi
 
 # remove pi sudoers backdoor

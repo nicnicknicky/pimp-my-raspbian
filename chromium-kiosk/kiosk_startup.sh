@@ -16,4 +16,4 @@ function source_boot_mod_config {
 CHROMIUM_URL=""
 CHROMIUM_FLAGS=""
 source_boot_mod_config  # source configuration from raspberry_boot_mod.conf
-"/usr/bin/chromium-browser $CHROMIUM_FLAGS $CHROMIUM_URL"
+/usr/bin/chromium-browser $CHROMIUM_FLAGS $CHROMIUM_URL

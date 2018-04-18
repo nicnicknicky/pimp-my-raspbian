@@ -18,7 +18,6 @@ function update_wpa_supplicant {
   if [[ ! -z $WLAN_SSID ]] && [[ ! -z $WLAN_WPA_PSK ]]; then
     sed -i "s|ssid.*|ssid=\"$WLAN_SSID\"|g" /etc/wpa_supplicant/wpa_supplicant.conf
     sed -i "s|psk.*|psk=\"$WLAN_WPA_PSK\"|g" /etc/wpa_supplicant/wpa_supplicant.conf
-    service networking restart
   fi
 }
 
