@@ -1,5 +1,0 @@
-
-# launch chromium kiosk on startup
-CHROMIUM_URL=""
-CHROMIUM_FLAGS=""
-/usr/bin/chromium-browser $CHROMIUM_FLAGS $CHROMIUM_URL

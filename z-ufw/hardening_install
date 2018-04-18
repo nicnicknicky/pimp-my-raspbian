@@ -4,8 +4,9 @@
 
 println "$(date) [TRACE] Installing ufw packages" "green"
 DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes ufw 1> /dev/null
-mv before.rules /etc/
-mv ufw.conf /etc/
+
+println "$(date) [TRACE] Modifying UFW defaults" "green"
+sed -i 's|^IPV6=.*|IPV6=no|g' /etc/default/ufw
 
 println "$(date) [TRACE] Adding ufw rules" "green"
 # default rules

@@ -3,6 +3,9 @@
 . ../setup.conf
 . /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
 
+# Update Script Variables
+sed -i "s|rpiusergroup|$RPI_DEV_GROUP|g" kiosk_startup.sh
+
 # install packages
 kiosk_packages=(chromium-browser x11-xserver-utils unclutter)
 for i in "${kiosk_packages[@]}"
@@ -11,8 +14,34 @@ do
   DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes $i
 done
 
-# configure chromium kiosk to launch on startup
-println "$(date) [TRACE] Editing startup.sh for chromium kiosk" "green"
-sed -i "s|^CHROMIUM_URL=|CHROMIUM_URL=\"$KIOSK_URL\"|g" kiosk_startup_calls
-sed -i "s|^CHROMIUM_FLAGS=|CHROMIUM_FLAGS=\"$KIOSK_FLAGS\"|g" kiosk_startup_calls
-cat kiosk_startup_calls >> $(dirname $0)/../startup-service/startup.sh
+# disabling sleep and change autologin user in lightdm config
+sed -i "/^\[Seat:\*\]$/ a xserver-command=X -s 0 dpms" /etc/lightdm/lightdm.conf
+
+##### LXSESSION directory for core user not available yet: manually create???
+# configure x-session for kiosk mode
+USER_AUTOSTART_PATH="/home/$GENERIC_ADMIN_USER/.config/lxsession/LXDE-pi/autostart"
+ORIG_AUTOSTART_PATH="/etc/xdg/lxsession/LXDE-pi/autostart"
+if [[ ! -e $USER_AUTOSTART_PATH ]] && [[ -e $ORIG_AUTOSTART_PATH ]]; then
+  cp $ORIG_AUTOSTART_PATH $USER_AUTOSTART_PATH
+fi
+if [[ -e $USER_AUTOSTART_PATH ]]; then
+  sed -i '/@xscreen.*/s/^/#/g' $USER_AUTOSTART_PATH
+  println "$(date) [TRACE] Adding commands to autostart" "green"
+cat <<EOF >> $USER_AUTOSTART_PATH
+@xset s off
+@xset -dpms
+@xset s noblank
+@unclutter -idle 0.1
+@/home/$GENERIC_ADMIN_USER/kiosk_startup.sh
+EOF
+fi
+
+# configure chromium kiosk URL and flags
+println "$(date) [TRACE] Editing kiosk_startup.sh for chromium kiosk" "green"
+sed -i "s|^CHROMIUM_URL=.*|CHROMIUM_URL=\"$KIOSK_URL\"|g" kiosk_startup.sh
+sed -i "s|^CHROMIUM_FLAGS=.*|CHROMIUM_FLAGS=\"$KIOSK_FLAGS\"|g" kiosk_startup.sh
+
+# install kiosk startup script
+chown core:core kiosk_startup.sh
+chmod +x kiosk_startup.sh
+mv kiosk_startup.sh /home/$GENERIC_ADMIN_USER/

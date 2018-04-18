@@ -16,6 +16,18 @@ cp $INSTALL_DIR/functions/color_text /usr/local/lib/$RPI_DEV_GROUP/functions/col
 chmod u+x /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
 . /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
 
+# [PRE-INSTALL] Install Raspbian Default Configuration
+zero_raspbian_config_path="$INSTALL_DIR/0-raspbian-config/install"
+if [[ -e $zero_raspbian_config_path ]]; then
+  println "$(date) [INFO] 0-raspbian-config: Installing locales, keyboard and defaults" "green"
+  chmod +x $zero_raspbian_config_path
+  cd $INSTALL_DIR/0-raspbian-config
+  $INSTALL_DIR/0-raspbian-config/install
+  source /etc/default/locale
+  rm -rf $zero_raspbian_config_path
+  cd $INSTALL_DIR
+fi
+
 # [PRE-INSTALL] Check network connectivity
 println "$(date) [INFO] Connectivity check" "green"
 ping -w 5 8.8.8.8 &> /dev/null
@@ -38,7 +50,7 @@ println "$(date) [INFO] Creating generic admin user $GENERIC_ADMIN_USER" "green"
 useradd $GENERIC_ADMIN_USER -s /bin/bash -m -G $RPI_DEV_GROUP
 
 println "$(date) [INFO] Taking in $GENERIC_ADMIN_USER user password" "green"
-read -e -p "Enter password for $GENERIC_ADMIN_USER user: " admin_user_password
+read -s -e -p "Enter password for $GENERIC_ADMIN_USER user: " admin_user_password
 
 println "$(date) [INFO] Adding $GENERIC_ADMIN_USER user password" "green"
 echo $GENERIC_ADMIN_USER:$admin_user_password | /usr/sbin/chpasswd
@@ -48,21 +60,44 @@ echo "# Allow members of group $RPI_DEV_GROUP to execute any command" >> /etc/su
 echo "%$RPI_DEV_GROUP ALL=(ALL:ALL) ALL" >> /etc/sudoers
 usermod -a -G $RPI_DEV_GROUP root
 
+if [[ $RASPBIAN_IMAGE_TYPE == "graphical" ]]; then
+  println "$(date) [INFO] Change autologin user for X session in lightdm configuration" "green"
+  sed -i "s|^autologin-user=.*|autologin-user=$GENERIC_ADMIN_USER|g" /etc/lightdm/lightdm.conf
+  systemctl restart lightdm
+fi
+
 # Log Folders
 println "$(date) [INFO] Creating new log folders" "green"
 mkdir -p /var/log/$RPI_DEV_GROUP
 chgrp -R $RPI_DEV_GROUP /var/log/$RPI_DEV_GROUP
 chmod -R g+w /var/log/$RPI_DEV_GROUP
 
-# Modify Apt Mirror
-#println "$(date) [INFO] Updating apt mirror in /etc/apt/sources.list" "green"
-#sed -i "s|deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi|deb http://mirror.mythic-beasts.com/raspbian/raspbian/ stretch main contrib non-free|g" /etc/apt/sources.list
+# Apt-Get Cleanup
+println "$(date) [INFO] Removing unecessary packages:" "green"
+pre_rm_packages="scratch squeak-plugins-scratch squeak-vm wolfram-engine python-minecraftpi
+minecraft-pi sonic-pi bluej greenfoot libreoffice* freepats python3-pygame
+python-pygame python-tk python3-rpi.gpio python-serial python3-serial python-picamera
+python3-picamera python3-pygame python-pygame python-tk python3-tk dillo x2x nuscratch
+timidity smartsim python3-numpy python3-pifacecommon python3-pifacedigitalio python-pifacecommon python-pifacedigitalio"
+for i in $pre_rm_packages
+do
+  println "$(date) [INFO] Removing $i" "green"
+  apt-get purge --yes $i 1> /dev/null
+done
+apt-get purge --auto-remove --yes 1> /dev/null
+apt-get autoremove --yes 1> /dev/null
+apt-get --yes clean
 
 # Apt-Get Essentials
 println "$(date) [INFO] Updating and upgrading apt-get" "green"
 DEBIAN_FRONTEND=noninteractive apt-get --yes update 1>/dev/null
 DEBIAN_FRONTEND=noninteractive apt-get --yes upgrade 1>/dev/null
 DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes apt-transport-https 1> /dev/null
+
+# Modify Apt Mirror
+println "$(date) [INFO] Updating apt mirror in /etc/apt/sources.list" "green"
+raspi_mirror="deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi"
+sed -i "s|deb http:\/\/raspbian.*|$raspi_mirror|g" /etc/apt/sources.list
 
 # Set Version
 println "$(date) [INFO] Add version file" "green"
@@ -73,7 +108,7 @@ echo "$version_detail" > /etc/raspbian_mod_image_version
 println "$(date) [INFO] Installing packages" "green"
 chmod u+x $INSTALL_DIR/install
 $INSTALL_DIR/install $RPI_DEV_GROUP
-cd
+cd $INSTALL_DIR
 
 # Disabling Services
 println "$(date) [INFO] Disabling services" "green"
@@ -102,11 +137,6 @@ dpkg --list | grep "^rc" | cut -d " " -f 3 | xargs -r sudo dpkg --purge
 
 println "$(date) [INFO] Cleaning packages" "green"
 apt-get --yes clean
-
-# reduce networking.service timeout threshold to improve boot time
-println "$(date) [INFO] Change networking.service start timeout to 5 secs" "green"
-sed -i 's|^TimeoutStartSec.*|TimeoutStartSec=5sec|g' /etc/systemd/system/network-online.target.wants/networking.service
-sed -i 's|^TimeoutStartSec.*|TimeoutStartSec=5sec|g' /lib/systemd/system/networking.service
 
 # run hardening script
 if [[ $HARDEN_RPI = "true" ]]; then

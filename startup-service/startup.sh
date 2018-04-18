@@ -10,20 +10,19 @@ function source_boot_mod_config {
   if [[ -e $BOOT_MOD_CONF_PATH ]]; then
     echo "$(date) rpiusergroup-startup.service: source $BOOT_MOD_CONF_PATH to update env variables."
     source $BOOT_MOD_CONF_PATH
-    update_wpa_supplicant
   fi
 }
 
 # update wpa_supplicant ssid,psk if found in raspberry_boot_mod.conf
 function update_wpa_supplicant {
-  if [[ ! -z $WLAN_SSID ]] && [[ ! -z $WLAN_WPA_PSK ]; then
+  if [[ ! -z $WLAN_SSID ]] && [[ ! -z $WLAN_WPA_PSK ]]; then
     sed -i "s|ssid.*|ssid=\"$WLAN_SSID\"|g" /etc/wpa_supplicant/wpa_supplicant.conf
     sed -i "s|psk.*|psk=\"$WLAN_WPA_PSK\"|g" /etc/wpa_supplicant/wpa_supplicant.conf
-    service networking restart
   fi
 }
 
 source_boot_mod_config
+update_wpa_supplicant
 
 # log boot up
 echo "
@@ -51,5 +50,4 @@ sed -i "/127.0.0.1/c 127.0.0.1 localhost ${DESIRED_HOSTNAME}" /etc/hosts
 # change group of apps folder
 chgrp rpiusergroup /usr/local/lib/rpiusergroup
 chmod g+x /usr/local/lib/rpiusergroup/*
-chmod g-x /usr/local/lib/rpiusergroup/*.txt
 chmod o-rwx /usr/local/lib/rpiusergroup/*
