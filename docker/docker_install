@@ -19,7 +19,7 @@ usermod -aG docker "$GENERIC_ADMIN_USER"
 
 # install daemon.json in /etc/docker
 println "$(date) [TRACE] Adding Docker daemon.json file to /etc/docker" "green"
-if [[ $DOCKER_DAEMON_JSON == "true" ]]; then 
+if [[  -e "./daemon.json" ]]; then 
     mkdir -p /etc/docker
     mv daemon.json /etc/docker/
 fi
