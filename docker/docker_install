@@ -1,0 +1,29 @@
+#!/bin/bash
+
+. ../setup.conf
+. /usr/local/lib/$RPI_DEV_GROUP/functions/color_text
+
+println "$(date) [TRACE] Installing Docker" "green"
+
+# uninstall old versions if any
+apt-get remove docker docker-engine docker.io
+
+# install docker
+# raspbian users are recommended to install using the convenience script
+# https://docs.docker.com/install/linux/docker-ce/debian/#install-using-the-convenience-script
+DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes curl 1> /dev/null
+curl -sSL https://get.docker.com | sh
+apt-get install --only-upgrade --yes docker-ce
+println "$(date) [TRACE] Adding $GENERIC_ADMIN_USER to docker group"
+usermod -aG docker "$GENERIC_ADMIN_USER"
+
+# install daemon.json in /etc/docker
+println "$(date) [TRACE] Adding Docker daemon.json file to /etc/docker" "green"
+if [[ $DOCKER_DAEMON_JSON == "true" ]]; then 
+    mkdir -p /etc/docker
+    mv daemon.json /etc/docker/
+fi
+
+# install docker compose
+DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes python-pip 1> /dev/null
+pip install docker-compose 1> /dev/null
