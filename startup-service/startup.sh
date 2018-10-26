@@ -36,6 +36,10 @@ if [[ $APPEND_CONFIG == "true" ]]; then
   if [[ -e $SRC_CONFIG_FILEPATH ]] && [[ -e $DST_CONFIG_FILEPATH ]]; then
     cat "$SRC_CONFIG_FILEPATH" >> "$DST_CONFIG_FILEPATH"
   fi
+  # reset variables as this operation should only be done once
+  sed -i 's|^APPEND_CONFIG.*|APPEND_CONFIG=\"false\"|g' /boot/raspberry_boot_mod.conf
+  sed -i 's|^SRC_CONFIG_FILEPATH.*|SRC_CONFIG_FILEPATH=\"\/boot\/\"|g' /boot/raspberry_boot_mod.conf
+  sed -i 's|^DST_CONFIG_FILEPATH.*|DST_CONFIG_FILEPATH=\"\"|g' /boot/raspberry_boot_mod.conf
 fi
 
 # log boot up
