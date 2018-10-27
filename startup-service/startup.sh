@@ -8,7 +8,7 @@ BOOT_MOD_CONF_PATH="/boot/raspberry_boot_mod.conf"
 # easy method to customise env variables without booting image
 function source_boot_mod_config {
   if [[ -e $BOOT_MOD_CONF_PATH ]]; then
-    echo "$(date) rpiusergroup-startup.service: source $BOOT_MOD_CONF_PATH to update env variables."
+    echo "$(date) startup.service: source $BOOT_MOD_CONF_PATH to update env variables."
     source $BOOT_MOD_CONF_PATH
   fi
 }
@@ -23,6 +23,24 @@ function update_wpa_supplicant {
 
 source_boot_mod_config
 update_wpa_supplicant
+
+# execute startup commands set in raspberry_boot_mod_config 
+if [[ ! -z $INSERT_STARTUP_CMD ]]; then
+  echo "$(date) startup.service: executing startup command - $INSERT_STARTUP_CMD"
+  bash -c "$INSERT_STARTUP_CMD" >>"$LOG_PATH" 2>&1
+fi
+
+# append configuration to files set in raspberry_boot_mod_config
+if [[ $APPEND_CONFIG == "true" ]]; then
+  echo "$(date) startup.service: appending configuration from - $SRC_CONFIG_FILEPATH to $DST_CONFIG_FILEPATH"
+  if [[ -e $SRC_CONFIG_FILEPATH ]] && [[ -e $DST_CONFIG_FILEPATH ]]; then
+    cat "$SRC_CONFIG_FILEPATH" >> "$DST_CONFIG_FILEPATH"
+  fi
+  # reset variables as this operation should only be done once
+  sed -i 's|^APPEND_CONFIG.*|APPEND_CONFIG=\"false\"|g' /boot/raspberry_boot_mod.conf
+  sed -i 's|^SRC_CONFIG_FILEPATH.*|SRC_CONFIG_FILEPATH=\"\/boot\/\"|g' /boot/raspberry_boot_mod.conf
+  sed -i 's|^DST_CONFIG_FILEPATH.*|DST_CONFIG_FILEPATH=\"\"|g' /boot/raspberry_boot_mod.conf
+fi
 
 # log boot up
 echo "
